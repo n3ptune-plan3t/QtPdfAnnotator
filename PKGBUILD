@@ -10,14 +10,14 @@ license=('GPL3')
 # Corrected the dependency from qt6-pdf to poppler-qt6
 depends=('qt6-base' 'poppler-qt6')
 makedepends=('cmake' 'qt6-tools')
-source=("$pkgname-$pkgver.tar.gz"
-        "CMakeLists.txt"
+# The source is the local files, not a tarball, because we build from a git checkout.
+source=("CMakeLists.txt"
         "main.cpp")
 sha256sums=('SKIP'
-            'SKIP'
             'SKIP')
 
 build() {
+  # The source files listed above are automatically copied into this directory
   cd "$srcdir"
   cmake -B build -S . \
     -DCMAKE_INSTALL_PREFIX=/usr \
