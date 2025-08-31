@@ -7,7 +7,8 @@ pkgdesc="A simple PDF annotator with an infinite canvas built with C++ and Qt."
 arch=('x86_64')
 url=""
 license=('GPL3')
-depends=('qt6-base' 'qt6-pdf')
+# Corrected the dependency from qt6-pdf to poppler-qt6
+depends=('qt6-base' 'poppler-qt6')
 makedepends=('cmake' 'qt6-tools')
 source=("$pkgname-$pkgver.tar.gz"
         "CMakeLists.txt"
@@ -28,3 +29,4 @@ package() {
   cd "$srcdir"
   DESTDIR="$pkgdir" cmake --install build
 }
+
