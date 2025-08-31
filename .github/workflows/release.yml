@@ -22,7 +22,7 @@ jobs:
         run: |
           pacman -Syu --noconfirm
           # Install all necessary build-time and run-time dependencies for the project
-          pacman -S --noconfirm --needed base-devel cmake qt6-base qt6-pdf
+          pacman -S --noconfirm --needed base-devel cmake qt6-base poppler-qt6
 
       - name: Set correct permissions for build user
         run: |
