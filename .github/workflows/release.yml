@@ -1,0 +1,62 @@
+name: Build and Release QtPdfAnnotator
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on tags like v0.1.0, v1.0, etc.
+  workflow_dispatch: # Allows manual triggering from the Actions tab
+
+jobs:
+  build:
+    name: Build Arch Linux Package
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+      options: --security-opt seccomp=unconfined
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          pacman -Syu --noconfirm
+          # Install all necessary build-time and run-time dependencies for the project
+          pacman -S --noconfirm --needed base-devel cmake qt6-base qt6-pdf
+
+      - name: Set correct permissions for build user
+        run: |
+          useradd -m builduser
+          # Allow builduser to use pacman for makepkg's dependency resolution (-s flag)
+          echo "builduser ALL=(ALL) NOPASSWD: /usr/bin/pacman" >> /etc/sudoers
+          chown -R builduser:builduser .
+
+      - name: Build the package as builduser
+        run: sudo -u builduser makepkg -sf --noconfirm
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: package
+          path: "*.pkg.tar.zst"
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # This permission is required to create a release and upload assets
+
+    steps:
+      - name: Download built package from artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: package
+
+      - name: Create Release and Upload Package
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          files: "*.pkg.tar.zst"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
